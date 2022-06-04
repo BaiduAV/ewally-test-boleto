@@ -1,19 +1,26 @@
-const boletoController = (req, res) => {
+import boletoCobranca from '../services/cobrança';
+import boletoConvenio from '../services/convenio';
+
+const billsController = (req, res) => {
     const { boleto } = req.params;
 
-    if (boleto.length !== 44) {
-        return res.status(400).json({
-            error: 'Boleto inválido',
-        });
+    const boletoStripped = boleto.split('')
+
+    if (boleto.length === 47) {
+        const barCode = boletoCobranca(boletoStripped)
+
+        if (barCode === null) {
+            return res.status(400).json({ error: 'Digito verificador inválido' })
+        }
+
+        return res.status(200).json(barCode)
     }
 
-    boleto.split('').forEach((item, index) => {
-        if (index % 2 === 0) {
-            boleto[index] = item.toUpperCase();
-        }
-    });
+    if (boleto.length === 48) {
+        boletoConvenio(boletoStripped)
+    }
 
-    res.json({ data: boleto }).status(200);
+    return res.status(400).json({ error: 'Boleto inválido' });
 };
 
-export default boletoController;
+export default billsController;
