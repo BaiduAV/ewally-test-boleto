@@ -82,8 +82,31 @@ const verifyDigit = (section) => {
     return verifiedDigits
 }
 
-const verifyGlobalDigit = (barCode) => barCode.slice(10, 20)
+const verifyGlobalDigit = (barCode) => {
+    const newBarCode = barCode.split('')
+    newBarCode.splice(4, 1)
+    let sum = 0
+    let multiplyResult = 0
+    let counter = 2
 
+    for (let index = newBarCode.length; index > 0; index--) {
+        if (counter > 9) {
+            counter = 2
+        }
+        multiplyResult = Number(newBarCode[index - 1]) * counter
+        sum += multiplyResult
+        counter++
+    }
+
+    if (11 - sum % 11 === 10 || 11 - sum % 11 === 11 || 11 - sum % 11 === 0) {
+        sum = 1
+    }
+    else {
+        sum = 11 - sum % 11
+    }
+
+    return sum
+}
 
 const boletoCobranca = (boleto) => {
     const barCode = formatBarCode(boleto)
@@ -98,11 +121,9 @@ const boletoCobranca = (boleto) => {
         return null
     }
 
-    if (!(verifyGlobalDigit(barCode) !== boleto.slice(10, 20))) {
-        return null
-    }
+    const globalDigit = verifyGlobalDigit(barCode)
 
-    return { barCode, amount, expirationDate }
+    return { barCode, amount, expirationDate, globalDigit }
 }
 
 export default boletoCobranca
