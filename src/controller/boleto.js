@@ -1,4 +1,4 @@
-import boletoCobranca from '../services/cobrança';
+import generalBills from '../services/cobrança';
 import boletoConvenio from '../services/convenio';
 
 const billsController = (req, res) => {
@@ -7,7 +7,7 @@ const billsController = (req, res) => {
     const boletoStripped = boleto.split('')
 
     if (boleto.length === 47) {
-        const barCode = boletoCobranca(boletoStripped)
+        const barCode = generalBills(boletoStripped)
 
         if (barCode === null) {
             return res.status(400).json({ error: 'Digito verificador inválido' })

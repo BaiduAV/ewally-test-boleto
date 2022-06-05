@@ -50,17 +50,8 @@ const verifyDigit = (section) => {
         }
 
         if (index === 9 || index === 20 || index === 31) {
-            if (sum.toString()[0] === '1' ||
-                sum.toString()[0] === '2' ||
-                sum.toString()[0] === '3' ||
-                sum.toString()[0] === '4' ||
-                sum.toString()[0] === '5' ||
-                sum.toString()[0] === '6' ||
-                sum.toString()[0] === '7' ||
-                sum.toString()[0] === '8' ||
-                sum.toString()[0] === '9') {
-                tenth = (Number(sum.toString()[0]) + 1) * 10
-            }
+
+            tenth = (Number(sum.toString()[0]) + 1) * 10
 
             if (index === 20) {
                 module = 0
@@ -108,22 +99,51 @@ const verifyGlobalDigit = (barCode) => {
     return sum
 }
 
-const boletoCobranca = (boleto) => {
-    const barCode = formatBarCode(boleto)
-    const amount = 0
-    const expirationDate = "20-11-2000"
+const calculateAmount = (valor) => {
+    let startSlice = 0
+    const cents = valor.slice(-2).join('')
 
-    const section = boleto.slice(0, 32)
+    for (let index = 0; index < valor.length; index++) {
+        if (valor[index] !== '0') {
+            startSlice = index
+            break
+        }
+    }
 
-    if (verifyDigit(section)[0] !== Number(boleto[9]) ||
-        verifyDigit(section)[1] !== Number(boleto[20]) ||
-        verifyDigit(section)[2] !== Number(boleto[31])) {
+    const amount = valor.slice(startSlice, 8).join('')
+    const fullAmount = `${amount}.${cents}`
+
+    return fullAmount
+}
+
+const calculateExpirationDate = (days) => {
+    const transformDays = Number(days.join('')) - 1000
+    const date = new Date('2000-07-03')
+    const newDate = new Date(date.setDate(date.getDate() + transformDays))
+    const month = newDate.getMonth() + 1
+    const day = newDate.getDate()
+    const year = newDate.getFullYear()
+
+    return `${day}-${month}-${year}`
+}
+
+const generalBills = (bill) => {
+    const barCode = formatBarCode(bill)
+    const amount = calculateAmount(bill.slice(37, 47))
+    const expirationDate = calculateExpirationDate(bill.slice(33, 37))
+    const section = bill.slice(0, 32)
+
+    if (verifyDigit(section)[0] !== Number(bill[9]) ||
+        verifyDigit(section)[1] !== Number(bill[20]) ||
+        verifyDigit(section)[2] !== Number(bill[31])) {
         return null
     }
 
-    const globalDigit = verifyGlobalDigit(barCode)
+    if (verifyGlobalDigit(barCode) !== Number(barCode[4])) {
+        return null
+    }
 
-    return { barCode, amount, expirationDate, globalDigit }
+    return { barCode, amount, expirationDate }
 }
 
-export default boletoCobranca
+export default generalBills
