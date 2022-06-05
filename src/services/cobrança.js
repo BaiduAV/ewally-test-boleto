@@ -111,9 +111,7 @@ const calculateAmount = (valor) => {
     }
 
     const amount = valor.slice(startSlice, 8).join('')
-    const fullAmount = `${amount}.${cents}`
-
-    return fullAmount
+    return `${amount}.${cents}`
 }
 
 const calculateExpirationDate = (days) => {
@@ -121,7 +119,7 @@ const calculateExpirationDate = (days) => {
     const date = new Date('2000-07-03')
     const newDate = new Date(date.setDate(date.getDate() + transformDays))
     const month = newDate.getMonth() + 1
-    const day = newDate.getDate()
+    const day = newDate.getDate() + 1
     const year = newDate.getFullYear()
 
     return `${day}-${month}-${year}`
@@ -141,7 +139,7 @@ const generalBills = (bill) => {
 
     if (verifyGlobalDigit(barCode) !== Number(barCode[4])) {
         return null
-    }
+    } 
 
     return { barCode, amount, expirationDate }
 }
